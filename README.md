@@ -157,10 +157,6 @@ Run locally using:
 cd app
 python app.py
 
-Then open:
-
-http://localhost:5000
-
 
 ---
 
