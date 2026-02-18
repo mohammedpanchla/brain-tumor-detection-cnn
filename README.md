@@ -152,10 +152,7 @@ Sample Predictions:
 
 A Flask-based web application allows users to upload MRI images and receive tumor predictions.
 
-Run locally using:
-
-cd app
-python app.py
+### LINK: https://muhammedpanchla-brain-tumor-detection.hf.space/#
 
 
 ---
