@@ -3,1021 +3,917 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuroScan AI - Brain Tumor Detection System</title>
+    <title>NeuroDetect AI — Brain Tumor Classification</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #ffffff;
-            --bg-secondary: #fafafa;
-            --bg-tertiary: #f5f5f5;
-            --border-light: #e5e5e5;
-            --border-medium: #d4d4d4;
-            --border-dark: #a3a3a3;
-            --text-primary: #0a0a0a;
-            --text-secondary: #525252;
-            --text-tertiary: #737373;
-            --accent-primary: #000000;
-            --accent-secondary: #262626;
-            --success: #16a34a;
-            --warning: #ea580c;
-            --danger: #dc2626;
-            --info: #0284c7;
+            --bg-app:        #f0f2f5;
+            --bg-white:      #ffffff;
+            --bg-input:      #f7f8fa;
+            --bg-hover:      #f0f2f5;
+            --border:        #e4e7ec;
+            --border-med:    #d0d5dd;
+            --text-primary:  #101828;
+            --text-secondary:#475467;
+            --text-dim:      #98a2b3;
+            --blue:          #2563eb;
+            --blue-light:    #eff6ff;
+            --blue-border:   #bfdbfe;
+            --green:         #16a34a;
+            --green-light:   #f0fdf4;
+            --green-border:  #bbf7d0;
+            --amber:         #d97706;
+            --amber-light:   #fffbeb;
+            --amber-border:  #fde68a;
+            --red:           #dc2626;
+            --red-light:     #fef2f2;
+            --red-border:    #fecaca;
+            --purple:        #7c3aed;
+            --purple-light:  #f5f3ff;
+            --purple-border: #ddd6fe;
+            --shadow-xs:     0 1px 2px rgba(16,24,40,.05);
+            --shadow-sm:     0 1px 3px rgba(16,24,40,.1), 0 1px 2px rgba(16,24,40,.06);
+            --radius:        10px;
+            --radius-sm:     6px;
+            --mono:          'IBM Plex Mono', monospace;
+            --sans:          'IBM Plex Sans', sans-serif;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
 
         body {
-            font-family: 'IBM Plex Sans', -apple-system, sans-serif;
-            background: var(--bg-primary);
+            font-family: var(--sans);
+            background: var(--bg-app);
             color: var(--text-primary);
             line-height: 1.5;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Grid system background */
-        .page-container {
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background:
+                radial-gradient(ellipse at 10% 10%, rgba(37,99,235,0.05) 0%, transparent 55%),
+                radial-gradient(ellipse at 90% 90%, rgba(124,58,237,0.04) 0%, transparent 55%);
+            pointer-events: none; z-index: 0;
+        }
+
+        /* ── Layout ── */
+        .shell {
             display: grid;
-            grid-template-columns: 240px 1fr;
+            grid-template-columns: 230px 1fr;
             min-height: 100vh;
+            position: relative; z-index: 1;
         }
 
-        /* Sidebar */
+        /* ── Sidebar ── */
         .sidebar {
-            background: var(--bg-secondary);
-            border-right: 1px solid var(--border-light);
-            padding: 2rem 0;
-            display: flex;
-            flex-direction: column;
+            background: var(--bg-white);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column;
+            position: sticky; top: 0; height: 100vh;
+            box-shadow: var(--shadow-sm);
         }
 
-        .logo-section {
-            padding: 0 1.5rem 2rem;
-            border-bottom: 1px solid var(--border-light);
+        .sidebar-brand {
+            padding: 1.625rem 1.5rem 1.375rem;
+            border-bottom: 1px solid var(--border);
         }
+        .brand-row {
+            display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem;
+        }
+        .brand-icon {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+            border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.3), 0 0 0 3px rgba(37,99,235,0.1);
+            position: relative;
+        }
+        .brand-icon::after {
+            content: '';
+            position: absolute; inset: -4px; border-radius: 13px;
+            border: 1.5px solid rgba(37,99,235,0.2);
+            animation: pulse-ring 3s ease-in-out infinite;
+        }
+        @keyframes pulse-ring { 0%,100%{transform:scale(1);opacity:.5} 50%{transform:scale(1.15);opacity:0} }
+        .brand-icon svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 2.5; }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 0.5rem;
-        }
+        .brand-name { font-size: 1.0625rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-primary); }
+        .brand-name em { font-style: normal; color: var(--blue); }
+        .brand-sub { font-family: var(--mono); font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.12em; }
 
-        .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: var(--accent-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'IBM Plex Mono', monospace;
-            font-weight: 600;
-            font-size: 16px;
-            color: white;
+        .sidebar-nav { padding: 1rem 0.75rem; flex: 1; }
+        .nav-section-lbl {
+            font-family: var(--mono); font-size: 0.5625rem;
+            text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-dim);
+            padding: 0 0.625rem; margin-bottom: 0.375rem; margin-top: 1.125rem;
         }
-
-        .logo-text {
-            font-size: 1.125rem;
-            font-weight: 600;
-            letter-spacing: -0.01em;
+        .nav-section-lbl:first-child { margin-top: 0; }
+        .nav-link {
+            display: flex; align-items: center; gap: 0.625rem;
+            padding: 0.5rem 0.75rem; border-radius: var(--radius-sm);
+            font-size: 0.8125rem; font-weight: 500;
+            color: var(--text-secondary); text-decoration: none;
+            transition: all 0.14s; cursor: pointer;
         }
-
-        .logo-subtitle {
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-            font-family: 'IBM Plex Mono', monospace;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-
-        .nav-section {
-            padding: 1.5rem 1rem;
-        }
-
-        .nav-label {
-            font-size: 0.6875rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-tertiary);
-            padding: 0 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.625rem 0.75rem;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.875rem;
-            border-radius: 4px;
-            transition: all 0.15s ease;
-            font-weight: 500;
-        }
-
-        .nav-item:hover {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-
-        .nav-item.active {
-            background: var(--accent-primary);
-            color: white;
-        }
-
-        .nav-icon {
-            width: 16px;
-            height: 16px;
-        }
+        .nav-link:hover { background: var(--bg-hover); color: var(--text-primary); }
+        .nav-link.active { background: var(--blue-light); color: var(--blue); border: 1px solid var(--blue-border); font-weight: 600; }
+        .nav-link svg { width: 14px; height: 14px; flex-shrink: 0; }
 
         .sidebar-footer {
-            margin-top: auto;
-            padding: 1.5rem;
-            border-top: 1px solid var(--border-light);
+            padding: 0.875rem 1.5rem; border-top: 1px solid var(--border); background: var(--bg-input);
         }
-
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-            font-family: 'IBM Plex Mono', monospace;
-        }
-
+        .model-status { display: flex; align-items: center; gap: 0.5rem; font-family: var(--mono); font-size: 0.6875rem; color: var(--text-dim); }
         .status-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--success);
+            width: 6px; height: 6px; border-radius: 50%; background: var(--green);
+            flex-shrink: 0; box-shadow: 0 0 0 2px rgba(22,163,74,0.2);
+            animation: blink 2.5s ease-in-out infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+        /* ── Main ── */
+        .main { display: flex; flex-direction: column; min-height: 100vh; }
+
+        .topbar {
+            background: var(--bg-white); border-bottom: 1px solid var(--border);
+            padding: 0.8125rem 2rem;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 10; box-shadow: var(--shadow-xs);
+        }
+        .breadcrumb { font-family: var(--mono); font-size: 0.75rem; color: var(--text-dim); display: flex; align-items: center; gap: 0.5rem; }
+        .breadcrumb .crumb { color: var(--text-secondary); }
+        .topbar-right { display: flex; gap: 0.5rem; }
+        .pill {
+            font-family: var(--mono); font-size: 0.6875rem;
+            padding: 0.3rem 0.75rem; border-radius: 20px;
+            border: 1px solid var(--border); background: var(--bg-input);
+            color: var(--text-secondary); display: flex; align-items: center; gap: 0.375rem;
+        }
+        .pill-dot { width: 5px; height: 5px; border-radius: 50%; }
+
+        /* ── Content ── */
+        .content { flex: 1; padding: 1.75rem 2rem; }
+        .grid {
+            display: grid; grid-template-columns: 1fr 340px; gap: 1.5rem; max-width: 1360px;
         }
 
-        /* Main content */
-        .main-content {
-            display: flex;
-            flex-direction: column;
+        /* ── Cards ── */
+        .card { background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-xs); }
+        .card-head {
+            padding: 0.9375rem 1.5rem; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            border-radius: var(--radius) var(--radius) 0 0;
         }
+        .card-label { font-family: var(--mono); font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-secondary); font-weight: 600; }
+        .card-tag { font-family: var(--mono); font-size: 0.5625rem; padding: 0.175rem 0.5rem; border-radius: 4px; border: 1px solid var(--border); color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; background: var(--bg-input); }
+        .card-body { padding: 1.5rem; }
 
-        /* Top bar */
-        .top-bar {
-            background: var(--bg-primary);
-            border-bottom: 1px solid var(--border-light);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* ── Upload ── */
+        .drop-zone {
+            border: 2px dashed var(--border-med); background: var(--bg-input);
+            border-radius: 8px; padding: 2.75rem 2rem; text-align: center;
+            cursor: pointer; transition: all 0.2s;
         }
-
-        .breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-family: 'IBM Plex Mono', monospace;
+        .drop-zone:hover, .drop-zone.over {
+            border-color: var(--blue); border-style: solid; background: var(--blue-light);
         }
-
-        .breadcrumb-separator {
-            color: var(--border-dark);
+        .dz-icon {
+            width: 54px; height: 54px;
+            background: linear-gradient(135deg, var(--blue-light), #dbeafe);
+            border: 1px solid var(--blue-border); border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; margin: 0 auto 1.125rem;
         }
+        .dz-icon svg { width: 22px; height: 22px; stroke: var(--blue); fill: none; stroke-width: 1.75; }
+        .dz-title { font-size: 0.9375rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary); }
+        .dz-sub { font-family: var(--mono); font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1.375rem; line-height: 1.7; }
+        .dz-formats { font-family: var(--mono); font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.75rem; }
 
-        .top-actions {
-            display: flex;
-            gap: 0.75rem;
-        }
-
-        .info-chip {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.375rem 0.75rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-light);
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-family: 'IBM Plex Mono', monospace;
-            color: var(--text-secondary);
-        }
-
-        /* Content area */
-        .content-area {
-            flex: 1;
-            padding: 2rem;
-            background: var(--bg-secondary);
-        }
-
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 1.5rem;
-            max-width: 1400px;
-        }
-
-        /* Cards */
-        .card {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-light);
-            border-radius: 0;
-        }
-
-        .card-header {
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid var(--border-light);
-        }
-
-        .card-title {
-            font-size: 0.875rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-primary);
-        }
-
-        .card-subtitle {
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-            margin-top: 0.25rem;
-            font-family: 'IBM Plex Mono', monospace;
-        }
-
-        .card-body {
-            padding: 1.5rem;
-        }
-
-        /* Upload section */
-        .upload-container {
-            border: 2px dashed var(--border-medium);
-            background: var(--bg-secondary);
-            padding: 3rem 2rem;
-            text-align: center;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .upload-container:hover {
-            border-color: var(--accent-primary);
-            background: var(--bg-tertiary);
-        }
-
-        .upload-container.drag-over {
-            border-color: var(--accent-primary);
-            background: var(--bg-tertiary);
-            border-style: solid;
-        }
-
-        .upload-icon {
-            width: 48px;
-            height: 48px;
-            margin: 0 auto 1.25rem;
-            stroke: var(--text-tertiary);
-        }
-
-        .upload-title {
-            font-size: 0.9375rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-
-        .upload-description {
-            font-size: 0.8125rem;
-            color: var(--text-tertiary);
-            margin-bottom: 1.5rem;
-            font-family: 'IBM Plex Mono', monospace;
-        }
-
-        .upload-formats {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-        }
-
+        /* ── Buttons ── */
         .btn {
-            display: inline-block;
-            padding: 0.625rem 1.5rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-            border: 2px solid var(--accent-primary);
-            background: var(--accent-primary);
-            color: white;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-family: 'IBM Plex Sans', sans-serif;
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+            padding: 0.5625rem 1.375rem; border-radius: var(--radius-sm);
+            font-family: var(--mono); font-size: 0.8125rem; font-weight: 600;
+            letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; border: none; transition: all 0.15s;
         }
-
-        .btn:hover {
-            background: var(--accent-secondary);
-            border-color: var(--accent-secondary);
+        .btn svg { width: 14px; height: 14px; }
+        .btn-blue {
+            background: linear-gradient(135deg, var(--blue), #1d4ed8); color: #fff;
+            box-shadow: 0 1px 3px rgba(37,99,235,.35), 0 2px 8px rgba(37,99,235,.2);
         }
+        .btn-blue:hover { background: linear-gradient(135deg,#1d4ed8,#1e3a8a); box-shadow: 0 4px 12px rgba(37,99,235,.4); transform: translateY(-1px); }
+        .btn-outline { background: var(--bg-white); border: 1px solid var(--border-med); color: var(--text-secondary); box-shadow: var(--shadow-xs); }
+        .btn-outline:hover { border-color: var(--text-secondary); color: var(--text-primary); }
 
-        .btn:active {
-            transform: scale(0.98);
+        /* ── File row ── */
+        .file-row {
+            display: none; margin-top: 1rem;
+            background: var(--bg-input); border: 1px solid var(--border);
+            border-radius: 8px; padding: 0.875rem 1.125rem;
+            align-items: center; justify-content: space-between;
         }
+        .file-row.show { display: flex; }
+        .file-left { display: flex; align-items: center; gap: 0.875rem; }
 
-        .btn-outline {
-            background: transparent;
-            color: var(--accent-primary);
+        .mri-thumb { width: 52px; height: 52px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border); display: none; flex-shrink: 0; }
+        .mri-thumb.show { display: block; }
+
+        .file-ico {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--blue-light), #dbeafe);
+            border: 1px solid var(--blue-border); border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
+        .file-ico svg { width: 18px; height: 18px; stroke: var(--blue); }
+        .file-name { font-size: 0.875rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.15rem; }
+        .file-meta { font-family: var(--mono); font-size: 0.6875rem; color: var(--text-dim); }
 
-        .btn-outline:hover {
-            background: var(--accent-primary);
-            color: white;
+        /* ── Action bar ── */
+        .act-bar { display: none; margin-top: 1.125rem; align-items: center; gap: 0.75rem; }
+        .act-bar.show { display: flex; }
+        .act-hint { font-family: var(--mono); font-size: 0.6875rem; color: var(--text-dim); }
+
+        /* ── Loading ── */
+        .loading { display: none; margin-top: 1.5rem; background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius); padding: 2.5rem; text-align: center; box-shadow: var(--shadow-xs); }
+        .loading.show { display: block; }
+        .brain-loader {
+            width: 48px; height: 48px; margin: 0 auto 1.25rem; border-radius: 50%;
+            border: 3px solid var(--blue-border); border-top-color: var(--blue);
+            animation: spin 0.9s linear infinite;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-txt { font-family: var(--mono); font-size: 0.8125rem; font-weight: 500; color: var(--text-secondary); animation: pulse-t 1.5s ease-in-out infinite; }
+        @keyframes pulse-t { 0%,100%{opacity:.5} 50%{opacity:1} }
+        .loading-sub { font-family: var(--mono); font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.375rem; }
 
-        .btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
+        /* ── Results ── */
+        .results { display: none; margin-top: 1.5rem; }
+        .results.show { display: block; animation: fadein .4s ease; }
+        @keyframes fadein { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+        /* ── Diagnosis banner ── */
+        .dx-banner {
+            display: flex; align-items: stretch; border-radius: var(--radius);
+            overflow: hidden; border: 1px solid transparent;
+            margin-bottom: 1.125rem; box-shadow: var(--shadow-sm);
         }
+        .dx-stripe { width: 5px; flex-shrink: 0; }
+        .dx-body { flex: 1; padding: 1.375rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
 
-        input[type="file"] {
-            display: none;
+        .dx-left { display: flex; align-items: center; gap: 1rem; }
+        .dx-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+        .dx-info {}
+        .dx-sublabel { font-family: var(--mono); font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-secondary); margin-bottom: 0.25rem; }
+        .dx-class { font-family: var(--mono); font-size: 1.5rem; font-weight: 700; }
+        .dx-desc { font-size: 0.8125rem; color: var(--text-secondary); margin-top: 0.3rem; max-width: 480px; }
+
+        .dx-right { text-align: right; flex-shrink: 0; }
+        .dx-pct { font-family: var(--mono); font-size: 2.5rem; font-weight: 700; line-height: 1; }
+        .dx-pct-lbl { font-family: var(--mono); font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-top: 0.25rem; }
+
+        /* class color themes */
+        .theme-glioma     { border-color: var(--red-border); }
+        .theme-glioma     .dx-stripe { background: var(--red); }
+        .theme-glioma     .dx-body   { background: var(--red-light); }
+        .theme-glioma     .dx-class, .theme-glioma .dx-pct { color: var(--red); }
+        .theme-glioma     .dx-dot    { background: var(--red); box-shadow: 0 0 0 4px rgba(220,38,38,.15); animation: blink 1s ease-in-out infinite; }
+
+        .theme-meningioma { border-color: var(--amber-border); }
+        .theme-meningioma .dx-stripe { background: var(--amber); }
+        .theme-meningioma .dx-body   { background: var(--amber-light); }
+        .theme-meningioma .dx-class, .theme-meningioma .dx-pct { color: var(--amber); }
+        .theme-meningioma .dx-dot    { background: var(--amber); box-shadow: 0 0 0 4px rgba(217,119,6,.15); animation: blink 1.4s ease-in-out infinite; }
+
+        .theme-pituitary  { border-color: var(--purple-border); }
+        .theme-pituitary  .dx-stripe { background: var(--purple); }
+        .theme-pituitary  .dx-body   { background: var(--purple-light); }
+        .theme-pituitary  .dx-class, .theme-pituitary .dx-pct { color: var(--purple); }
+        .theme-pituitary  .dx-dot    { background: var(--purple); box-shadow: 0 0 0 4px rgba(124,58,237,.15); animation: blink 1.6s ease-in-out infinite; }
+
+        .theme-notumor    { border-color: var(--green-border); }
+        .theme-notumor    .dx-stripe { background: var(--green); }
+        .theme-notumor    .dx-body   { background: var(--green-light); }
+        .theme-notumor    .dx-class, .theme-notumor .dx-pct { color: var(--green); }
+        .theme-notumor    .dx-dot    { background: var(--green); box-shadow: 0 0 0 4px rgba(22,163,74,.15); }
+
+        /* ── Scan + file info card ── */
+        .scan-info-row { display: flex; gap: 1.25rem; align-items: flex-start; }
+        .scan-preview { width: 130px; flex-shrink: 0; }
+        .scan-preview-img {
+            width: 130px; height: 130px; object-fit: cover;
+            border-radius: 8px; border: 1px solid var(--border);
+            background: #e5e7eb; display: none;
         }
-
-        /* Preview section */
-        .preview-grid {
-            display: none;
-            grid-template-columns: 200px 1fr;
-            gap: 1.5rem;
-            padding: 1.5rem;
-            border: 1px solid var(--border-light);
-            background: var(--bg-secondary);
-            margin-top: 1.5rem;
+        .scan-preview-img.show { display: block; }
+        .scan-placeholder {
+            width: 130px; height: 130px; border-radius: 8px;
+            border: 1px dashed var(--border-med); background: var(--bg-input);
+            display: flex; align-items: center; justify-content: center; color: var(--text-dim); font-family: var(--mono); font-size: 0.625rem; text-align: center;
         }
+        .file-stats-grid { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
 
-        .preview-grid.show {
-            display: grid;
-        }
+        /* ── Per-class confidence grid ── */
+        .conf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+        .conf-item { background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; padding: 0.875rem 1rem; }
+        .conf-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .conf-name { font-family: var(--mono); font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+        .conf-pct  { font-family: var(--mono); font-size: 0.875rem; font-weight: 700; }
+        .conf-track { height: 5px; background: var(--border); border-radius: 10px; overflow: hidden; }
+        .conf-fill  { height: 100%; border-radius: 10px; width: 0%; transition: width 0.7s cubic-bezier(0.4,0,0.2,1); }
 
-        .preview-image-container {
-            position: relative;
-        }
+        .ci-glioma     .conf-name, .ci-glioma     .conf-pct { color: var(--red); }
+        .ci-glioma     .conf-fill { background: var(--red); }
+        .ci-meningioma .conf-name, .ci-meningioma .conf-pct { color: var(--amber); }
+        .ci-meningioma .conf-fill { background: var(--amber); }
+        .ci-pituitary  .conf-name, .ci-pituitary  .conf-pct { color: var(--purple); }
+        .ci-pituitary  .conf-fill { background: var(--purple); }
+        .ci-notumor    .conf-name, .ci-notumor    .conf-pct { color: var(--green); }
+        .ci-notumor    .conf-fill { background: var(--green); }
 
-        .preview-image {
-            width: 200px;
-            height: 200px;
-            object-fit: cover;
-            border: 1px solid var(--border-light);
-            background: white;
-        }
+        /* ── Stat box ── */
+        .stat-box { background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; padding: 0.875rem 1rem; }
+        .stat-lbl { font-family: var(--mono); font-size: 0.5625rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-dim); margin-bottom: 0.375rem; }
+        .stat-val { font-family: var(--mono); font-size: 1rem; font-weight: 600; color: var(--text-primary); word-break: break-all; }
+        .stat-unit { font-size: 0.625rem; color: var(--text-dim); }
 
-        .preview-metadata {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
+        /* ── Right column ── */
+        .ts-row { display: none; font-family: var(--mono); font-size: 0.6875rem; color: var(--text-dim); padding: 0.6rem 1rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-white); margin-bottom: 1rem; justify-content: space-between; }
+        .ts-row.show { display: flex; }
 
-        .metadata-row {
-            display: flex;
-            justify-content: space-between;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid var(--border-light);
-        }
+        .info-card { margin-bottom: 1.125rem; }
+        .meta-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5625rem 0; border-bottom: 1px solid var(--border); font-size: 0.8125rem; }
+        .meta-row:last-child { border-bottom: none; }
+        .meta-k { color: var(--text-secondary); }
+        .meta-v { font-family: var(--mono); font-size: 0.75rem; color: var(--text-primary); font-weight: 500; text-align: right; }
+        .meta-v.good { color: var(--green); }
 
-        .metadata-row:last-child {
-            border-bottom: none;
-        }
+        /* Class legend */
+        .legend-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.625rem 0; border-bottom: 1px solid var(--border); }
+        .legend-item:last-child { border-bottom: none; }
+        .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+        .legend-name { font-weight: 600; font-size: 0.8125rem; flex: 1; }
+        .legend-tag { font-family: var(--mono); font-size: 0.6rem; padding: 0.15rem 0.45rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
 
-        .metadata-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-tertiary);
-            font-weight: 600;
-        }
+        /* action recommendation card */
+        .action-card { display: none; border-radius: var(--radius); border: 1px solid transparent; padding: 1.125rem; margin-bottom: 1.125rem; }
+        .action-card.show { display: block; }
+        .action-card.urgent { background: var(--red-light); border-color: var(--red-border); }
+        .action-card.caution { background: var(--amber-light); border-color: var(--amber-border); }
+        .action-card.monitor { background: var(--purple-light); border-color: var(--purple-border); }
+        .action-card.clear { background: var(--green-light); border-color: var(--green-border); }
+        .act-ico { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.625rem; }
+        .action-card.urgent  .act-ico { background: var(--red-border); }
+        .action-card.caution .act-ico { background: var(--amber-border); }
+        .action-card.monitor .act-ico { background: var(--purple-border); }
+        .action-card.clear   .act-ico { background: var(--green-border); }
+        .act-ico svg { width: 14px; height: 14px; }
+        .action-card.urgent  .act-ico svg { stroke: var(--red); }
+        .action-card.caution .act-ico svg { stroke: var(--amber); }
+        .action-card.monitor .act-ico svg { stroke: var(--purple); }
+        .action-card.clear   .act-ico svg { stroke: var(--green); }
+        .act-title { font-family: var(--mono); font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.35rem; }
+        .action-card.urgent  .act-title { color: var(--red); }
+        .action-card.caution .act-title { color: var(--amber); }
+        .action-card.monitor .act-title { color: var(--purple); }
+        .action-card.clear   .act-title { color: var(--green); }
+        .act-txt { font-size: 0.8125rem; color: var(--text-secondary); line-height: 1.55; }
 
-        .metadata-value {
-            font-size: 0.8125rem;
-            font-family: 'IBM Plex Mono', monospace;
-            color: var(--text-primary);
-        }
+        .disclaimer { font-family: var(--mono); font-size: 0.6rem; color: var(--text-dim); padding: 0.875rem 1rem; border-radius: 8px; border: 1px solid var(--border); line-height: 1.7; background: var(--bg-white); margin-top: 1rem; }
 
-        .action-buttons {
-            display: flex;
-            gap: 0.75rem;
-            margin-top: 1.5rem;
-        }
-
-        .action-buttons .btn {
-            flex: 1;
-        }
-
-        /* Info panel */
-        .info-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .info-card {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-light);
-        }
-
-        .stat-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            padding: 1.5rem;
-        }
-
-        .stat-item {
-            padding: 1rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-light);
-        }
-
-        .stat-label {
-            font-size: 0.6875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-tertiary);
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            font-family: 'IBM Plex Mono', monospace;
-            color: var(--text-primary);
-        }
-
-        .stat-unit {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        /* System info */
-        .system-info {
-            padding: 1.5rem;
-        }
-
-        .system-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid var(--border-light);
-            font-size: 0.8125rem;
-        }
-
-        .system-row:last-child {
-            border-bottom: none;
-        }
-
-        .system-label {
-            color: var(--text-tertiary);
-            font-family: 'IBM Plex Mono', monospace;
-        }
-
-        .system-value {
-            color: var(--text-primary);
-            font-weight: 500;
-        }
-
-        /* Loading state */
-        .loading-overlay {
-            display: none;
-            padding: 3rem 2rem;
-            text-align: center;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-light);
-            margin-top: 1.5rem;
-        }
-
-        .loading-overlay.show {
-            display: block;
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            margin: 0 auto 1.5rem;
-            border: 3px solid var(--border-light);
-            border-top-color: var(--accent-primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-family: 'IBM Plex Mono', monospace;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .loading-progress {
-            margin-top: 1rem;
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-        }
-
-        /* Results section */
-        .results-container {
-            display: none;
-            margin-top: 1.5rem;
-        }
-
-        .results-container.show {
-            display: block;
-        }
-
-        .result-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.25rem 1.5rem;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-light);
-            border-bottom: none;
-        }
-
-        .result-title {
-            font-size: 0.875rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .result-timestamp {
-            font-size: 0.75rem;
-            font-family: 'IBM Plex Mono', monospace;
-            color: var(--text-tertiary);
-        }
-
-        .result-body {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-light);
-            padding: 2rem 1.5rem;
-        }
-
-        .diagnosis-section {
-            margin-bottom: 2rem;
-        }
-
-        .diagnosis-label {
-            font-size: 0.6875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-tertiary);
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-        }
-
-        .diagnosis-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            letter-spacing: -0.02em;
-        }
-
-        /* Confidence meter */
-        .confidence-section {
-            padding-top: 2rem;
-            border-top: 1px solid var(--border-light);
-        }
-
-        .confidence-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 1rem;
-        }
-
-        .confidence-label {
-            font-size: 0.6875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-tertiary);
-            font-weight: 600;
-        }
-
-        .confidence-percentage {
-            font-size: 2rem;
-            font-weight: 700;
-            font-family: 'IBM Plex Mono', monospace;
-            color: var(--text-primary);
-        }
-
-        .progress-track {
-            height: 8px;
-            background: var(--border-light);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--accent-primary);
-            width: 0%;
-            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .confidence-scale {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 0.5rem;
-            font-size: 0.6875rem;
-            font-family: 'IBM Plex Mono', monospace;
-            color: var(--text-tertiary);
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .page-container {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                display: none;
-            }
-
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .top-bar {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-
-            .content-area {
-                padding: 1rem;
-            }
-
-            .preview-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .preview-image {
-                width: 100%;
-            }
-
-            .stat-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg-app); }
+        ::-webkit-scrollbar-thumb { background: var(--border-med); border-radius: 20px; }
     </style>
 </head>
 <body>
-    <div class="page-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="logo-section">
-                <div class="logo">
-                    <div class="logo-icon">N</div>
-                    <div>
-                        <div class="logo-text">NeuroScan</div>
-                        <div class="logo-subtitle">AI System</div>
-                    </div>
+
+<div class="shell">
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-row">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+                </div>
+                <div>
+                    <div class="brand-name">Neuro<em>Detect</em> AI</div>
                 </div>
             </div>
+            <div class="brand-sub">Brain Tumor Classification · v1.0</div>
+        </div>
 
-            <nav class="nav-section">
-                <div class="nav-label">Analysis</div>
-                <a href="#" class="nav-item active">
-                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 11l3 3L22 4"></path>
-                        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
-                    </svg>
-                    New Detection
-                </a>
-                <a href="#" class="nav-item">
-                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
-                    </svg>
-                    History
-                </a>
-                <a href="#" class="nav-item">
-                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M12 1v6m0 6v6m5.2-13.2l-4.2 4.2m-2 2l-4.2 4.2m10.4 0l-4.2-4.2m-2-2l-4.2-4.2"></path>
-                    </svg>
-                    Statistics
-                </a>
-            </nav>
+        <nav class="sidebar-nav">
+            <div class="nav-section-lbl">Workspace</div>
+            <a class="nav-link active" href="#">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                MRI Analysis
+            </a>
+            <a class="nav-link" href="#">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                Dashboard
+            </a>
 
-            <nav class="nav-section">
-                <div class="nav-label">Settings</div>
-                <a href="#" class="nav-item">
-                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"></path>
-                    </svg>
-                    Preferences
-                </a>
-            </nav>
+            <div class="nav-section-lbl">Model</div>
+            <a class="nav-link" href="#">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+                VGG16 Transfer
+            </a>
+            <a class="nav-link" href="#">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                BraTS Dataset
+            </a>
 
-            <div class="sidebar-footer">
-                <div class="status-indicator">
-                    <span class="status-dot"></span>
-                    <span>System Online</span>
-                </div>
+            <div class="nav-section-lbl">Info</div>
+            <a class="nav-link" href="#">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                About
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="model-status">
+                <div class="status-dot"></div>
+                Model active · VGG16
             </div>
-        </aside>
+        </div>
+    </aside>
 
-        <!-- Main content -->
-        <main class="main-content">
-            <div class="top-bar">
-                <div class="breadcrumb">
-                    <span>Analysis</span>
-                    <span class="breadcrumb-separator">/</span>
-                    <span>New Detection</span>
-                </div>
-                <div class="top-actions">
-                    <div class="info-chip">
-                        <span>Model: v2.1.4</span>
-                    </div>
-                    <div class="info-chip">
-                        <span>Accuracy: 98.3%</span>
-                    </div>
-                </div>
+    <!-- ── Main ── -->
+    <div class="main">
+
+        <header class="topbar">
+            <div class="breadcrumb">
+                <span>NeuroDetect</span>
+                <span style="color:var(--border-med)">/</span>
+                <span class="crumb">MRI Analysis</span>
             </div>
+            <div class="topbar-right">
+                <div class="pill"><div class="pill-dot" style="background:var(--green)"></div>Test Acc: 93.25%</div>
+                <div class="pill"><div class="pill-dot" style="background:var(--blue)"></div>Val: 98.48%</div>
+                <div class="pill">VGG16 · 4 Classes</div>
+            </div>
+        </header>
 
-            <div class="content-area">
-                <div class="content-grid">
-                    <!-- Main upload section -->
-                    <div>
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="card-title">MRI Scan Upload</div>
-                                <div class="card-subtitle">Upload brain MRI for tumor detection analysis</div>
+        <div class="content">
+            <div class="grid">
+
+                <!-- Left column -->
+                <div>
+
+                    <!-- Upload card -->
+                    <div class="card">
+                        <div class="card-head">
+                            <span class="card-label">MRI Scan Input</span>
+                            <span class="card-tag">224 × 224 · RGB · ImageNet norm</span>
+                        </div>
+                        <div class="card-body">
+
+                            <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileIn').click()">
+                                <input type="file" id="fileIn" accept="image/*" style="display:none">
+                                <div class="dz-icon">
+                                    <svg viewBox="0 0 24 24"><polyline points="16,16 12,12 8,16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+                                </div>
+                                <div class="dz-title">Drop your brain MRI scan here</div>
+                                <div class="dz-sub">
+                                    Upload an MRI image to classify tumor type<br>
+                                    Glioma · Meningioma · Pituitary · No Tumor
+                                </div>
+                                <button class="btn btn-blue" style="pointer-events:none">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    Choose File
+                                </button>
+                                <div class="dz-formats">Accepted: .jpg · .jpeg · .png · .tif</div>
                             </div>
-                            <div class="card-body">
-                                <div class="upload-container" id="uploadArea">
-                                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path>
-                                        <polyline points="17 8 12 3 7 8"></polyline>
-                                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                                    </svg>
-                                    <div class="upload-title">Drop MRI scan here</div>
-                                    <div class="upload-description">or click to browse files</div>
-                                    <div class="upload-formats">Supported: JPEG, PNG, DICOM • Max size: 10MB</div>
-                                    <button class="btn" onclick="document.getElementById('fileInput').click()">
-                                        Select File
-                                    </button>
-                                    <input type="file" id="fileInput" name="file" accept="image/*">
-                                </div>
 
-                                <div class="preview-grid" id="previewSection">
-                                    <div class="preview-image-container">
-                                        <img id="previewImage" class="preview-image" alt="MRI Preview">
+                            <!-- File row with MRI thumbnail -->
+                            <div class="file-row" id="fileRow">
+                                <div class="file-left">
+                                    <img id="mriThumb" class="mri-thumb" src="" alt="MRI preview">
+                                    <div class="file-ico" id="fileIco">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
                                     </div>
-                                    <div class="preview-metadata">
-                                        <div class="metadata-row">
-                                            <span class="metadata-label">Filename</span>
-                                            <span class="metadata-value" id="fileName">—</span>
-                                        </div>
-                                        <div class="metadata-row">
-                                            <span class="metadata-label">File Size</span>
-                                            <span class="metadata-value" id="fileSize">—</span>
-                                        </div>
-                                        <div class="metadata-row">
-                                            <span class="metadata-label">Format</span>
-                                            <span class="metadata-value" id="fileFormat">—</span>
-                                        </div>
-                                        <div class="metadata-row">
-                                            <span class="metadata-label">Dimensions</span>
-                                            <span class="metadata-value" id="fileDimensions">—</span>
-                                        </div>
-                                        <div class="action-buttons">
-                                            <button class="btn btn-outline" onclick="removeImage()">Remove</button>
-                                        </div>
+                                    <div>
+                                        <div class="file-name" id="fileName">—</div>
+                                        <div class="file-meta"><span id="fileSize">—</span> · <span id="fileDims">—</span> · <span id="fileExt">—</span></div>
                                     </div>
                                 </div>
+                                <button class="btn btn-outline" style="padding:0.35rem .875rem;font-size:.75rem" onclick="clearFile()">Remove</button>
+                            </div>
 
-                                <div class="action-buttons" id="analyzeSection" style="display: none; margin-top: 1.5rem;">
-                                    <button class="btn" id="analyzeButton" onclick="analyzeImage()">
-                                        Run Analysis
-                                    </button>
-                                </div>
+                            <div class="act-bar" id="actBar">
+                                <button class="btn btn-blue" id="analyzeBtn" onclick="run()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                                    Analyse MRI Scan
+                                </button>
+                                <span class="act-hint">VGG16 · softmax · 4 classes</span>
+                            </div>
 
-                                <div class="loading-overlay" id="loadingSection">
-                                    <div class="loading-spinner"></div>
-                                    <div class="loading-text">Processing Image</div>
-                                    <div class="loading-progress">Running neural network inference...</div>
-                                </div>
+                            <div class="loading" id="loading">
+                                <div class="brain-loader"></div>
+                                <div class="loading-txt">Analysing MRI scan...</div>
+                                <div class="loading-sub">VGG16 feature extraction → classification head → softmax</div>
+                            </div>
+                        </div>
+                    </div>
 
-                                <div class="results-container" id="resultsSection">
-                                    <div class="result-header">
-                                        <div class="result-title">Analysis Results</div>
-                                        <div class="result-timestamp" id="timestamp">--:--:--</div>
+                    <!-- Results section -->
+                    <div class="results" id="results">
+
+                        <!-- Diagnosis banner -->
+                        <div class="dx-banner" id="dxBanner">
+                            <div class="dx-stripe"></div>
+                            <div class="dx-body">
+                                <div class="dx-left">
+                                    <div class="dx-dot" id="dxDot"></div>
+                                    <div class="dx-info">
+                                        <div class="dx-sublabel">Diagnosis</div>
+                                        <div class="dx-class" id="dxClass">—</div>
+                                        <div class="dx-desc"  id="dxDesc">—</div>
                                     </div>
-                                    <div class="result-body">
-                                        <div class="diagnosis-section">
-                                            <div class="diagnosis-label">Diagnosis</div>
-                                            <div class="diagnosis-value" id="diagnosisResult">No Tumor Detected</div>
+                                </div>
+                                <div class="dx-right">
+                                    <div class="dx-pct"     id="dxPct">—%</div>
+                                    <div class="dx-pct-lbl">Confidence</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scan preview + file stats -->
+                        <div class="card" style="margin-bottom:1rem">
+                            <div class="card-head">
+                                <span class="card-label">Scan Preview · File Information</span>
+                                <span class="card-tag" id="scanBadge">—</span>
+                            </div>
+                            <div class="card-body" style="padding:1.125rem 1.5rem">
+                                <div class="scan-info-row">
+                                    <div class="scan-preview">
+                                        <img id="scanPreviewImg" class="scan-preview-img" src="" alt="MRI Scan">
+                                        <div class="scan-placeholder" id="scanPlaceholder">
+                                            No preview
                                         </div>
-                                        <div class="confidence-section">
-                                            <div class="confidence-header">
-                                                <div class="confidence-label">Confidence Score</div>
-                                                <div class="confidence-percentage" id="confidenceValue">0%</div>
-                                            </div>
-                                            <div class="progress-track">
-                                                <div class="progress-fill" id="progressBar"></div>
-                                            </div>
-                                            <div class="confidence-scale">
-                                                <span>0%</span>
-                                                <span>25%</span>
-                                                <span>50%</span>
-                                                <span>75%</span>
-                                                <span>100%</span>
-                                            </div>
+                                    </div>
+                                    <div class="file-stats-grid">
+                                        <div class="stat-box">
+                                            <div class="stat-lbl">File Name</div>
+                                            <div class="stat-val" id="rFileName" style="font-size:.8125rem">—</div>
+                                        </div>
+                                        <div class="stat-box">
+                                            <div class="stat-lbl">Dimensions</div>
+                                            <div class="stat-val" id="rDims">—</div>
+                                        </div>
+                                        <div class="stat-box">
+                                            <div class="stat-lbl">File Size</div>
+                                            <div class="stat-val" id="rSize">—</div>
+                                        </div>
+                                        <div class="stat-box">
+                                            <div class="stat-lbl">Format</div>
+                                            <div class="stat-val" id="rFormat">—</div>
+                                        </div>
+                                        <div class="stat-box">
+                                            <div class="stat-lbl">Analysis Time</div>
+                                            <div class="stat-val" id="rTime">—</div>
+                                        </div>
+                                        <div class="stat-box">
+                                            <div class="stat-lbl">Model Input</div>
+                                            <div class="stat-val" style="font-size:.8125rem">224 × 224</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Info panel -->
-                    <div class="info-panel">
-                        <div class="info-card">
-                            <div class="card-header">
-                                <div class="card-title">Model Performance</div>
+                        <!-- Per-class confidence breakdown -->
+                        <div class="card" style="margin-bottom:1rem">
+                            <div class="card-head">
+                                <span class="card-label">Per-Class Probability Breakdown</span>
+                                <span class="card-tag">Softmax output</span>
                             </div>
-                            <div class="stat-grid">
-                                <div class="stat-item">
-                                    <div class="stat-label">Accuracy</div>
-                                    <div class="stat-value">98.3<span class="stat-unit">%</span></div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-label">Precision</div>
-                                    <div class="stat-value">97.8<span class="stat-unit">%</span></div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-label">Recall</div>
-                                    <div class="stat-value">96.5<span class="stat-unit">%</span></div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-label">F1 Score</div>
-                                    <div class="stat-value">97.1<span class="stat-unit">%</span></div>
+                            <div class="card-body" style="padding:1.125rem 1.5rem">
+                                <div class="conf-grid">
+                                    <div class="conf-item ci-glioma">
+                                        <div class="conf-head">
+                                            <span class="conf-name">Glioma</span>
+                                            <span class="conf-pct" id="pctGlioma">—</span>
+                                        </div>
+                                        <div class="conf-track"><div class="conf-fill" id="barGlioma"></div></div>
+                                    </div>
+                                    <div class="conf-item ci-meningioma">
+                                        <div class="conf-head">
+                                            <span class="conf-name">Meningioma</span>
+                                            <span class="conf-pct" id="pctMeningioma">—</span>
+                                        </div>
+                                        <div class="conf-track"><div class="conf-fill" id="barMeningioma"></div></div>
+                                    </div>
+                                    <div class="conf-item ci-pituitary">
+                                        <div class="conf-head">
+                                            <span class="conf-name">Pituitary</span>
+                                            <span class="conf-pct" id="pctPituitary">—</span>
+                                        </div>
+                                        <div class="conf-track"><div class="conf-fill" id="barPituitary"></div></div>
+                                    </div>
+                                    <div class="conf-item ci-notumor">
+                                        <div class="conf-head">
+                                            <span class="conf-name">No Tumor</span>
+                                            <span class="conf-pct" id="pctNotumor">—</span>
+                                        </div>
+                                        <div class="conf-track"><div class="conf-fill" id="barNotumor"></div></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="info-card">
-                            <div class="card-header">
-                                <div class="card-title">System Information</div>
-                            </div>
-                            <div class="system-info">
-                                <div class="system-row">
-                                    <span class="system-label">Model Version</span>
-                                    <span class="system-value">v2.1.4</span>
-                                </div>
-                                <div class="system-row">
-                                    <span class="system-label">Architecture</span>
-                                    <span class="system-value">ResNet-50</span>
-                                </div>
-                                <div class="system-row">
-                                    <span class="system-label">Training Dataset</span>
-                                    <span class="system-value">BraTS 2023</span>
-                                </div>
-                                <div class="system-row">
-                                    <span class="system-label">Last Updated</span>
-                                    <span class="system-value">2026-01-15</span>
-                                </div>
-                                <div class="system-row">
-                                    <span class="system-label">Status</span>
-                                    <span class="system-value">Active</span>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
+
+                <!-- Right column -->
+                <div>
+
+                    <div class="ts-row" id="tsRow">
+                        <span>Analysis completed</span>
+                        <span id="tsVal">—</span>
+                    </div>
+
+                    <!-- Clinical action card -->
+                    <div class="action-card" id="actionCard">
+                        <div class="act-ico">
+                            <svg id="actIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"></svg>
+                        </div>
+                        <div class="act-title" id="actTitle">—</div>
+                        <div class="act-txt"   id="actTxt">—</div>
+                    </div>
+
+                    <!-- Model Performance -->
+                    <div class="card info-card">
+                        <div class="card-head"><span class="card-label">Model Performance</span></div>
+                        <div class="card-body" style="padding:0.875rem 1.25rem">
+                            <div class="meta-row"><span class="meta-k">Architecture</span><span class="meta-v">VGG16 + Custom Head</span></div>
+                            <div class="meta-row"><span class="meta-k">Test Accuracy</span><span class="meta-v good">93.25%</span></div>
+                            <div class="meta-row"><span class="meta-k">Best Val Accuracy</span><span class="meta-v good">98.48%</span></div>
+                            <div class="meta-row"><span class="meta-k">Epochs</span><span class="meta-v">10</span></div>
+                            <div class="meta-row"><span class="meta-k">Optimizer</span><span class="meta-v">Adam · lr 0.0001</span></div>
+                            <div class="meta-row"><span class="meta-k">Loss</span><span class="meta-v">CrossEntropyLoss</span></div>
+                            <div class="meta-row"><span class="meta-k">Framework</span><span class="meta-v">PyTorch</span></div>
+                            <div class="meta-row"><span class="meta-k">Train images</span><span class="meta-v">4,480</span></div>
+                            <div class="meta-row"><span class="meta-k">Test images</span><span class="meta-v">1,600</span></div>
+                            <div class="meta-row"><span class="meta-k">Input size</span><span class="meta-v">224 × 224 × 3</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Tumor classes -->
+                    <div class="card info-card">
+                        <div class="card-head"><span class="card-label">Tumor Classes</span></div>
+                        <div class="card-body" style="padding:0.875rem 1.25rem">
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background:var(--red)"></div>
+                                <span class="legend-name">Glioma</span>
+                                <span class="legend-tag" style="background:var(--red-light);color:var(--red);border:1px solid var(--red-border)">High Risk</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background:var(--amber)"></div>
+                                <span class="legend-name">Meningioma</span>
+                                <span class="legend-tag" style="background:var(--amber-light);color:var(--amber);border:1px solid var(--amber-border)">Moderate</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background:var(--purple)"></div>
+                                <span class="legend-name">Pituitary</span>
+                                <span class="legend-tag" style="background:var(--purple-light);color:var(--purple);border:1px solid var(--purple-border)">Monitor</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background:var(--green)"></div>
+                                <span class="legend-name">No Tumor</span>
+                                <span class="legend-tag" style="background:var(--green-light);color:var(--green);border:1px solid var(--green-border)">Normal</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- How it works -->
+                    <div class="card info-card">
+                        <div class="card-head"><span class="card-label">How It Works</span></div>
+                        <div class="card-body" style="padding:0.875rem 1.25rem">
+                            <div class="meta-row"><span class="meta-k">Step 1</span><span class="meta-v" style="font-size:.6875rem">Resize to 224 × 224</span></div>
+                            <div class="meta-row"><span class="meta-k">Step 2</span><span class="meta-v" style="font-size:.6875rem">ImageNet normalize</span></div>
+                            <div class="meta-row"><span class="meta-k">Step 3</span><span class="meta-v" style="font-size:.6875rem">VGG16 feature extract</span></div>
+                            <div class="meta-row"><span class="meta-k">Step 4</span><span class="meta-v" style="font-size:.6875rem">FC layers (512→128→4)</span></div>
+                            <div class="meta-row"><span class="meta-k">Step 5</span><span class="meta-v" style="font-size:.6875rem">Softmax → 4 probs</span></div>
+                        </div>
+                    </div>
+
+                    <div class="disclaimer">
+                        ⚠ FOR RESEARCH USE ONLY.<br>
+                        Not a certified medical device. Do not use for clinical diagnosis. Always consult a qualified radiologist or neurologist for medical evaluation.
+                    </div>
+
+                </div>
+
             </div>
-        </main>
+        </div>
     </div>
+</div>
 
-    <script>
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        const previewSection = document.getElementById('previewSection');
-        const previewImage = document.getElementById('previewImage');
-        const analyzeSection = document.getElementById('analyzeSection');
-        const loadingSection = document.getElementById('loadingSection');
-        const resultsSection = document.getElementById('resultsSection');
-        let selectedFile = null;
+<script>
+    const dropZone = document.getElementById('dropZone');
+    const fileIn   = document.getElementById('fileIn');
+    const fileRow  = document.getElementById('fileRow');
+    const actBar   = document.getElementById('actBar');
+    const loading  = document.getElementById('loading');
+    const results  = document.getElementById('results');
+    let picked     = null;
+    let pickedDataUrl = null;
+    let pickedDims = '—';
 
-        // Drag and drop
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('drag-over');
-        });
+    // ── Class configuration ──────────────────────────────────────
+    const CLASS_CONFIG = {
+        'glioma': {
+            label:  'Glioma Tumor',
+            theme:  'theme-glioma',
+            action: { type: 'urgent', title: 'Urgent Specialist Referral', text: 'Glioma is an aggressive tumour originating in glial cells. Immediate referral to a neuro-oncologist is strongly recommended for further imaging and biopsy evaluation.' },
+            icoPath: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'
+        },
+        'meningioma': {
+            label:  'Meningioma Tumor',
+            theme:  'theme-meningioma',
+            action: { type: 'caution', title: 'Clinical Evaluation Advised', text: 'Meningioma is typically a slow-growing, often benign tumour arising from the meninges. Neurosurgical consultation and follow-up imaging are recommended.' },
+            icoPath: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'
+        },
+        'pituitary': {
+            label:  'Pituitary Tumor',
+            theme:  'theme-pituitary',
+            action: { type: 'monitor', title: 'Endocrine Review Required', text: 'Pituitary tumours may affect hormone regulation. Referral to an endocrinologist alongside neurosurgery is advisable for hormonal profiling and further evaluation.' },
+            icoPath: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'
+        },
+        'notumor': {
+            label:  'No Tumor Detected',
+            theme:  'theme-notumor',
+            action: { type: 'clear', title: 'No Abnormality Detected', text: 'The model found no evidence of a tumor in this MRI scan. Routine monitoring as per clinical protocol is recommended.' },
+            icoPath: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/>'
+        }
+    };
 
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('drag-over');
-        });
+    // Helper — normalise raw class string to our keys
+    function normaliseClass(raw) {
+        const s = (raw || '').toLowerCase().replace(/[^a-z]/g, '');
+        if (s.includes('glioma'))     return 'glioma';
+        if (s.includes('meningioma')) return 'meningioma';
+        if (s.includes('pituitary'))  return 'pituitary';
+        if (s.includes('notumor') || s.includes('notum') || s.includes('no')) return 'notumor';
+        return 'glioma'; // fallback
+    }
 
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('drag-over');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFile(files[0]);
-            }
-        });
+    // ── Drag & drop ──────────────────────────────────────────────
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault(); dropZone.classList.remove('over');
+        if (e.dataTransfer.files[0]) pick(e.dataTransfer.files[0]);
+    });
+    fileIn.addEventListener('change', e => { if (e.target.files[0]) pick(e.target.files[0]); });
 
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handleFile(e.target.files[0]);
-            }
-        });
+    // ── Handle file pick ─────────────────────────────────────────
+    function pick(f) {
+        if (!f.type.startsWith('image/')) { alert('Please upload an image file.'); return; }
+        picked = f;
 
-        function handleFile(file) {
-            if (!file.type.startsWith('image/')) {
-                alert('Please upload an image file');
-                return;
-            }
+        const reader = new FileReader();
+        reader.onload = ev => {
+            pickedDataUrl = ev.target.result;
 
-            selectedFile = file;
-            const reader = new FileReader();
-            
-            reader.onload = (e) => {
-                previewImage.src = e.target.result;
-                
-                // Get image dimensions
-                const img = new Image();
-                img.onload = () => {
-                    document.getElementById('fileDimensions').textContent = `${img.width} × ${img.height}`;
-                };
-                img.src = e.target.result;
+            // Thumbnail in file row
+            const thumb = document.getElementById('mriThumb');
+            thumb.src = pickedDataUrl;
+            thumb.classList.add('show');
+            document.getElementById('fileIco').style.display = 'none';
 
-                document.getElementById('fileName').textContent = file.name;
-                document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(2) + ' KB';
-                document.getElementById('fileFormat').textContent = file.type.split('/')[1].toUpperCase();
-                
-                previewSection.classList.add('show');
-                analyzeSection.style.display = 'block';
-                resultsSection.classList.remove('show');
+            // Get natural dimensions
+            const img = new Image();
+            img.onload = () => {
+                pickedDims = img.width + ' × ' + img.height;
+                document.getElementById('fileDims').textContent = pickedDims;
             };
-            
-            reader.readAsDataURL(file);
+            img.src = pickedDataUrl;
+        };
+        reader.readAsDataURL(f);
+
+        document.getElementById('fileName').textContent = f.name;
+        document.getElementById('fileSize').textContent = (f.size / 1024).toFixed(1) + ' KB';
+        document.getElementById('fileExt').textContent  = f.name.split('.').pop().toUpperCase();
+
+        fileRow.classList.add('show');
+        actBar.classList.add('show');
+        results.classList.remove('show');
+        document.getElementById('tsRow').classList.remove('show');
+        document.getElementById('actionCard').classList.remove('show');
+    }
+
+    function clearFile() {
+        picked = null; pickedDataUrl = null; fileIn.value = '';
+        fileRow.classList.remove('show');
+        actBar.classList.remove('show');
+        results.classList.remove('show');
+        document.getElementById('tsRow').classList.remove('show');
+        document.getElementById('actionCard').classList.remove('show');
+        document.getElementById('mriThumb').classList.remove('show');
+        document.getElementById('fileIco').style.display = '';
+    }
+
+    // ── Run analysis ─────────────────────────────────────────────
+    function run() {
+        if (!picked) return;
+        actBar.classList.remove('show');
+        results.classList.remove('show');
+        loading.classList.add('show');
+
+        const fd = new FormData();
+        fd.append('file', picked);
+
+        const t0 = performance.now();
+
+        fetch('/', { method: 'POST', body: fd })
+        .then(r => r.json())
+        .then(d => {
+            const elapsed = ((performance.now() - t0) / 1000).toFixed(2) + 's';
+            loading.classList.remove('show');
+            if (d.error) { alert('Error: ' + d.error); actBar.classList.add('show'); return; }
+            render(d, elapsed);
+        })
+        .catch(() => {
+            loading.classList.remove('show');
+            actBar.classList.add('show');
+            alert('Analysis failed. Please try again.');
+        });
+    }
+
+    // ── Render results ───────────────────────────────────────────
+    function render(d, elapsed) {
+        const key  = normaliseClass(d.class);
+        const cfg  = CLASS_CONFIG[key];
+        const conf = parseFloat(d.confidence);
+
+        // Timestamp
+        document.getElementById('tsVal').textContent = new Date().toLocaleTimeString('en-GB', { hour12: false });
+        document.getElementById('tsRow').classList.add('show');
+
+        // Diagnosis banner
+        const banner = document.getElementById('dxBanner');
+        banner.className = 'dx-banner ' + cfg.theme;
+        document.getElementById('dxClass').textContent = cfg.label;
+        document.getElementById('dxDesc').textContent  = cfg.action.text;
+        document.getElementById('dxPct').textContent   = conf.toFixed(2) + '%';
+
+        // Scan badge
+        document.getElementById('scanBadge').textContent = key !== 'notumor' ? '⚠ Abnormality detected' : '✓ Normal scan';
+
+        // Scan preview in results
+        if (pickedDataUrl) {
+            const si = document.getElementById('scanPreviewImg');
+            si.src = pickedDataUrl; si.classList.add('show');
+            document.getElementById('scanPlaceholder').style.display = 'none';
         }
 
-        function removeImage() {
-            selectedFile = null;
-            fileInput.value = '';
-            previewSection.classList.remove('show');
-            analyzeSection.style.display = 'none';
-            resultsSection.classList.remove('show');
-        }
+        // File stats
+        document.getElementById('rFileName').textContent = document.getElementById('fileName').textContent;
+        document.getElementById('rDims').textContent     = pickedDims;
+        document.getElementById('rSize').textContent     = document.getElementById('fileSize').textContent;
+        document.getElementById('rFormat').textContent   = document.getElementById('fileExt').textContent;
+        document.getElementById('rTime').textContent     = elapsed || '—';
 
-        function analyzeImage() {
-            if (!selectedFile) return;
+        // Per-class probabilities
+        const probs = d.all_probs || distributeProbs(key, conf);
+        setBar('pctGlioma',     'barGlioma',     probs.glioma     || 0);
+        setBar('pctMeningioma', 'barMeningioma', probs.meningioma || 0);
+        setBar('pctPituitary',  'barPituitary',  probs.pituitary  || 0);
+        setBar('pctNotumor',    'barNotumor',    probs.notumor    || 0);
 
-            analyzeSection.style.display = 'none';
-            resultsSection.classList.remove('show');
-            loadingSection.classList.add('show');
+        // Clinical action card
+        const card = document.getElementById('actionCard');
+        card.className = 'action-card show ' + cfg.action.type;
+        document.getElementById('actTitle').textContent = cfg.action.title;
+        document.getElementById('actTxt').textContent   = cfg.action.text;
+        document.getElementById('actIco').innerHTML     = cfg.icoPath;
 
-            const formData = new FormData();
-            formData.append('file', selectedFile);
-            
-            fetch('/', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                loadingSection.classList.remove('show');
-                
-                const now = new Date();
-                document.getElementById('timestamp').textContent = now.toLocaleTimeString('en-US', { hour12: false });
-                document.getElementById('diagnosisResult').innerText = data.class;
-                document.getElementById('confidenceValue').innerText = data.confidence.toFixed(2) + '%';
-                
-                setTimeout(() => {
-                    document.getElementById('progressBar').style.width = data.confidence + '%';
-                }, 100);
-                
-                resultsSection.classList.add('show');
-                analyzeSection.style.display = 'block';
-                document.getElementById('analyzeButton').textContent = 'Run New Analysis';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                loadingSection.classList.remove('show');
-                analyzeSection.style.display = 'block';
-                alert('Analysis failed. Please try again.');
-            });
-        }
-    </script>
+        // Show results
+        results.classList.add('show');
+        actBar.classList.add('show');
+        document.getElementById('analyzeBtn').textContent = 'Re-analyse Scan';
+    }
+
+    function setBar(pctId, barId, val) {
+        document.getElementById(pctId).textContent = parseFloat(val).toFixed(2) + '%';
+        setTimeout(() => {
+            document.getElementById(barId).style.width = Math.min(parseFloat(val), 100) + '%';
+        }, 120);
+    }
+
+    // Distribute remaining probability evenly if all_probs not provided by backend
+    function distributeProbs(topKey, topConf) {
+        const rest = (100 - topConf) / 3;
+        return { glioma: rest, meningioma: rest, pituitary: rest, notumor: rest, [topKey]: topConf };
+    }
+</script>
 </body>
 </html>
